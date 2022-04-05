@@ -67,6 +67,9 @@ router.get("/", async (req, res, next) => {
         convoJSON.otherUser.online = false;
       }
 
+      // makes the messages show in reverse order to display from oldest to newest
+      convoJSON.messages.reverse();
+
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
       conversations[i] = convoJSON;
