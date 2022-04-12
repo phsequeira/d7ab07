@@ -43,4 +43,33 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.put('/read', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const otherUserId = req.body.otherUserId,
+          conversationId = req.body.conversationId
+    const conversation = await Conversation.findByPk(conversationId, {
+      include: {
+        model: Message
+      }
+    });
+    const senderId = conversation.messages[conversation.messages.length - 1].senderId
+    if (req.user.id  === conversation.user1Id || req.user.id === conversation.user2Id && req.user.id !== senderId){
+      await Message.update({readStatus: true}, {
+      where: {
+        senderId: otherUserId,
+        conversationId: conversationId
+      }
+    })
+    res.json(conversationId)
+    } else {
+      return res.sendStatus(403)
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 module.exports = router;

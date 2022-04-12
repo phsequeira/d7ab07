@@ -83,7 +83,7 @@ const Home = ({ user, logout }) => {
       setConversations((prev) => 
         prev.map((convo) => {
           if (convo.otherUser.id === recipientId) {
-            const convoCopy = {...convo}
+            const convoCopy = {...convo, messages: [ ...convo.messages ]}
             convoCopy.messages.push(message);
             convoCopy.latestMessageText = message.text;
             convoCopy.id = message.conversationId;
@@ -117,8 +117,43 @@ const Home = ({ user, logout }) => {
     []
   );
 
-  const setActiveChat = (username) => {
+  const readStatus = async (otherUserId, conversationId) => {
+    try {
+      const body = {
+        otherUserId: otherUserId,
+        conversationId: conversationId
+      }
+      const {data} = await axios.put('/api/messages/read', body)
+      setReadStatus(data)
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
+  const setReadStatus = useCallback((conversationId) => {
+    setConversations((prev) => 
+    prev.map((convo) => {
+      if (convo.id === conversationId){
+        const convoCopy = {...convo}
+        convoCopy.notificationCount = 0;
+        return convoCopy
+      } else {
+        return convo
+      }
+    })
+    )
+  }, []);
+
+  const setActiveChat = (conversation) => {
+    const conversationId = conversation.id,
+          otherUserId = conversation.otherUser.id,
+          username = conversation.otherUser.username;
+    if (!conversationId){
+      setActiveConversation(username)
+    } else {
+    readStatus(otherUserId, conversationId)
     setActiveConversation(username);
+    }
   };
 
   const addOnlineUser = useCallback((id) => {

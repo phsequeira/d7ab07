@@ -86,7 +86,7 @@ router.get("/", async (req, res, next) => {
       const lastRead = hasRead(convoJSON.messages, userId)
 
       if (lastRead){
-        convoJSON.latestMessageText = lastRead.text
+        convoJSON.lastReadMessageText = lastRead.text
       }
 
       // set properties for notification count and latest message preview
