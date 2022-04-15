@@ -17,16 +17,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Chat = ({ conversation, user, setActiveChat }) => {
+const Chat = ({ conversation, setActiveChat }) => {
   const classes = useStyles();
   const { otherUser } = conversation;
 
-  const handleClick = async (conversation, user) => {
-    await setActiveChat(conversation, user.id);
+  const handleClick = async (conversation) => {
+    await setActiveChat(conversation);
   };
 
   return (
-    <Box onClick={() => handleClick(conversation, user)} className={classes.root}>
+    <Box onClick={() => handleClick(conversation)} className={classes.root}>
       <BadgeAvatar
         photoUrl={otherUser.photoUrl}
         username={otherUser.username}
