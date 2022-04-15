@@ -55,17 +55,17 @@ router.put('/read', async (req, res, next) => {
         model: Message
       }
     });
-    const senderId = conversation.messages[conversation.messages.length - 1].senderId
-    if (req.user.id  === conversation.user1Id || req.user.id === conversation.user2Id && req.user.id !== senderId){
-      await Message.update({readStatus: true}, {
-      where: {
-        senderId: otherUserId,
-        conversationId: conversationId
-      }
-    })
-    res.json(conversationId)
-    } else {
+
+    if (req.user.id  !== conversation.user1Id && req.user.id !== conversation.user2Id) {
       return res.sendStatus(403)
+    } else {
+      await Message.update({readStatus: true}, {
+        where: {
+          senderId: otherUserId,
+          conversationId: conversationId
+        }
+      })
+      res.json(conversationId)
     }
   } catch (error) {
     next(error)

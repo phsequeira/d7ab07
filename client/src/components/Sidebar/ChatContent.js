@@ -41,11 +41,11 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        {notificationCount > 0 ?  <Typography className={classes.previewTextBold}>
+        <Typography className={notificationCount > 0 ? 
+          `${classes.previewText} ${classes.previewTextBoldreviewText}`
+          : classes.previewText}>
           {latestMessageText}
-        </Typography> :  <Typography className={classes.previewText}>
-          {latestMessageText}
-        </Typography>}
+        </Typography>
       </Box>   
       {notificationCount > 0 && <Badge badgeContent={notificationCount} color="primary" className={classes.otherUserImg}>
 </Badge>}

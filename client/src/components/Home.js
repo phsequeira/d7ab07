@@ -124,7 +124,8 @@ const Home = ({ user, logout }) => {
         conversationId: conversationId
       }
       const {data} = await axios.put('/api/messages/read', body)
-      setReadStatus(data)
+      setReadStatus(data);
+      socket.emit('read-message', data);
     } catch (error) {
       console.error(error)
     }
@@ -191,15 +192,16 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-
+    socket.on('read-message', readStatus);
     return () => {
       // before the component is destroyed
       // unbind all event handlers used in this component
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', readStatus);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, readStatus, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
