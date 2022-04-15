@@ -3,6 +3,20 @@ const { User, Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
+const getCount = (messages, userId) => {
+  const count = messages.filter((message) => {
+    return message.readStatus === false && message.senderId === userId
+  })
+  return count.length;
+}
+
+const hasRead = (messages, userId) => {
+  const readArray = messages.filter((message) => {
+    return message.readStatus === true && message.senderId === userId
+  })
+  return readArray[0]
+}
+
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
 router.get("/", async (req, res, next) => {
@@ -67,10 +81,17 @@ router.get("/", async (req, res, next) => {
         convoJSON.otherUser.online = false;
       }
 
-      
+      const notificationCount = getCount(convoJSON.messages, convoJSON.otherUser.id)
+
+      const lastRead = hasRead(convoJSON.messages, userId)
+
+      if (lastRead){
+        convoJSON.lastReadMessageText = lastRead.text
+      }
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
+      convoJSON.notificationCount = notificationCount
       conversations[i] = convoJSON;
       
       convoJSON.messages.reverse();

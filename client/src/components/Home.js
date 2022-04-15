@@ -117,8 +117,44 @@ const Home = ({ user, logout }) => {
     []
   );
 
-  const setActiveChat = (username) => {
+  const readStatus = async (otherUserId, conversationId) => {
+    try {
+      const body = {
+        otherUserId: otherUserId,
+        conversationId: conversationId
+      }
+      const {data} = await axios.put('/api/messages/read', body)
+      setReadStatus(data);
+      socket.emit('read-message', data);
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
+  const setReadStatus = useCallback((conversationId) => {
+    setConversations((prev) => 
+    prev.map((convo) => {
+      if (convo.id === conversationId){
+        const convoCopy = {...convo}
+        convoCopy.notificationCount = 0;
+        return convoCopy
+      } else {
+        return convo
+      }
+    })
+    )
+  }, []);
+
+  const setActiveChat = (conversation) => {
+    const conversationId = conversation.id,
+          otherUserId = conversation.otherUser.id,
+          username = conversation.otherUser.username;
+    if (!conversationId){
+      setActiveConversation(username)
+    } else {
+    readStatus(otherUserId, conversationId)
     setActiveConversation(username);
+    }
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -156,15 +192,16 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-
+    socket.on('read-message', readStatus);
     return () => {
       // before the component is destroyed
       // unbind all event handlers used in this component
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', readStatus);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, readStatus, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
